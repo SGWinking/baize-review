@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="白泽评审 Baize Review">
+  <title>白泽评审 · Baize Review</title>
+  <!-- 圆形朱文印：知万物、辨优劣的白泽之目 -->
+  <!-- 「白」= 中央留白的印面；朱色只走线，不做大面积深色填充 -->
+  <circle cx="32" cy="32" r="30" fill="#ffffff"/>
+  <circle cx="32" cy="32" r="28.5" fill="none" stroke="#b23a2c" stroke-width="2.4"/>
+  <!-- 神兽之角：一道简笔冠脊 -->
+  <path d="M22.5 24C24 17.8 27.6 15 32 15S40 17.8 41.5 24"
+        fill="none" stroke="#b23a2c" stroke-width="2.6"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- 眼：辨优劣 -->
+  <path d="M15.5 35C22 26.6 42 26.6 48.5 35C42 43.4 22 43.4 15.5 35Z"
+        fill="none" stroke="#b23a2c" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="32" cy="35" r="6.2" fill="#b23a2c"/>
+  <circle cx="34.3" cy="32.7" r="1.6" fill="#ffffff"/>
+  <!-- 下端短须，稳住印面重心 -->
+  <path d="M24.5 50.5H39.5" fill="none" stroke="#b23a2c" stroke-width="2.6" stroke-linecap="round"/>
+</svg>

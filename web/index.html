@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>白泽评审 · Baize Review / 壁画修复候选评分工作台 — 大云壁画工具箱</title>
+<link rel="icon" href="/assets/logo.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="app">
+
+  <!-- ============================================================ 页头 -->
+  <header class="series-header">
+    <div class="series-brand">
+      <img src="/assets/logo.svg" alt="白泽评审 Baize Review" width="40" height="40">
+      <div class="names">
+        <span class="series-name">大云壁画工具箱</span>
+        <span class="tool-name">
+          白泽评审
+          <span class="en">Baize Review</span>
+          <span class="ver" id="appVersion">v-</span>
+        </span>
+      </div>
+    </div>
+
+    <nav class="nav-tabs" aria-label="流程">
+      <button class="nav-tab active" data-step="import" type="button">1 导入</button>
+      <button class="nav-tab" data-step="mask" type="button">2 Mask</button>
+      <button class="nav-tab" data-step="score" type="button">3 评分</button>
+    </nav>
+
+    <div class="series-meta">
+      <span class="status-dot" id="healthDot" title="服务状态"></span>
+      <span id="healthText">检测中</span>
+      <span class="port" id="portText">:8766</span>
+      <button id="themeToggle" class="theme-toggle" type="button">深色</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- ======================================================== 1 导入 -->
+    <section id="importStep" class="page">
+      <div class="page-inner">
+
+        <article class="card">
+          <div class="card-head">
+            <div>
+              <h2 class="card-title">导入图片</h2>
+              <div class="card-sub">支持原生选择 / 拖拽 / 历史原图</div>
+            </div>
+          </div>
+          <div class="card-body stack">
+
+            <div class="import-grid">
+              <div class="field">
+                <label for="projectName">项目名称</label>
+                <input id="projectName" type="text" value="大云院壁画修复候选评分">
+              </div>
+              <div class="field">
+                <label for="originalHistory">原图历史</label>
+                <select id="originalHistory">
+                  <option value="">暂无历史</option>
+                </select>
+              </div>
+              <label class="drop" data-dropzone="original" for="originalInput">
+                <span class="label">原图</span>
+                <strong class="filename" id="originalName">拖入或点击选择</strong>
+                <span class="hint">接受 PNG / JPG / WEBP / BMP / TIFF</span>
+                <input id="originalInput" type="file" accept="image/*">
+              </label>
+            </div>
+
+            <label class="drop" data-dropzone="candidate" for="candidateInput">
+              <span class="label">AI 修复候选图（可多选，支持 3 / 5 / 10 张或更多）</span>
+              <strong class="filename" id="candidateName">拖入或点击选择</strong>
+              <span class="hint">评分前会自动等比对齐到长边 2048</span>
+              <input id="candidateInput" type="file" accept="image/*" multiple>
+            </label>
+
+            <div class="btn-row">
+              <button id="createProjectButton" class="btn-primary" type="button">进入手动流程</button>
+              <button id="autoReviewButton" class="btn-ghost" type="button">自动评审（一键到底）</button>
+              <button id="pickOriginal" class="btn-ghost" type="button">选择原图</button>
+              <button id="pickCandidates" class="btn-ghost" type="button">选择候选</button>
+            </div>
+
+            <div class="status" id="importStatus">等待导入</div>
+          </div>
+        </article>
+
+        <div class="metrics">
+          <div class="metric"><div class="k">原图尺寸</div><div class="v" id="originalSize">-</div></div>
+          <div class="metric"><div class="k">候选数量</div><div class="v" id="candidateCount">0</div></div>
+          <div class="metric"><div class="k">尺寸对齐</div><div class="v" id="sizeCheck">-</div></div>
+          <div class="metric accent"><div class="k">当前项目</div><div class="v" id="projectIdText">-</div></div>
+        </div>
+
+        <article class="card">
+          <div class="card-head"><h2 class="card-title">候选图列表</h2></div>
+          <div class="card-body">
+            <div id="candidateList" class="file-list">
+              <div class="empty-state">还没有导入候选图。</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2 class="card-title">尺寸对齐记录</h2>
+            <span class="card-sub">按长边 2048 等比缩放，保留长宽比</span>
+          </div>
+          <div class="card-body">
+            <div id="resizeLog" class="resize-log">
+              <div class="empty-state">创建项目后显示原尺寸与评分尺寸。</div>
+            </div>
+          </div>
+        </article>
+
+        <div class="hint-list">
+          <strong>关于白泽评审</strong>
+          <ul>
+            <li>白泽知万物、能辨优劣：本工具用可解释的轻量指标，替你在若干张 AI 修复候选里分出高下。</li>
+            <li>两张榜各有立场：<strong>保守修复榜</strong>偏「修旧如旧」，<strong>展示复原榜</strong>偏「展陈清晰」。</li>
+            <li>评分前提是所有图<b>像素级同尺寸</b>，因此导入后统一对齐到长边 2048，不会改动长宽比。</li>
+            <li>原图与候选图只在本机处理，服务只监听 <code>127.0.0.1</code>，不上传任何云端。</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ======================================================== 2 Mask -->
+    <section id="maskStep" class="page" hidden>
+      <div class="page-inner">
+        <div class="mask-layout">
+
+          <article class="card viewer-card">
+            <div class="card-head">
+              <div>
+                <h2 class="card-title">Mask 主视图</h2>
+                <div class="card-sub">绿色=证据 · 橙色=损伤/低证据 · 蓝紫=不确定</div>
+              </div>
+              <div class="viewer-tools">
+                <label for="maskOpacity">叠加</label>
+                <input id="maskOpacity" type="range" min="0" max="100" value="55">
+                <span id="maskOpacityText">55%</span>
+                <button id="generateMaskButton" class="btn-ghost small" type="button">生成 mask</button>
+                <button id="saveOverrideButton" class="btn-ghost small" type="button">保存修正</button>
+                <button id="resetOverrideButton" class="btn-ghost small" type="button">回到自动</button>
+              </div>
+            </div>
+            <div id="maskStage" class="image-stage">
+              <div id="maskLayer" class="image-layer">
+                <img id="originalPreview" alt="原图">
+                <img id="maskPreview" class="overlay-img" alt="mask 预览">
+                <canvas id="paintCanvas"></canvas>
+                <div id="brushCursor" class="brush-cursor" hidden></div>
+              </div>
+            </div>
+          </article>
+
+          <aside class="side-panel">
+
+            <div class="card">
+              <div class="card-head"><h2 class="card-title">修正工具</h2></div>
+              <div class="card-body stack-2">
+                <div class="segment">
+                  <label><input type="radio" name="paintMode" value="evidence" checked>证据</label>
+                  <label><input type="radio" name="paintMode" value="damage">损伤</label>
+                  <label><input type="radio" name="paintMode" value="uncertain">不确定</label>
+                  <label><input type="radio" name="paintMode" value="erase">擦除</label>
+                </div>
+                <div class="segment">
+                  <label><input type="radio" name="paintTool" value="brush" checked>画笔</label>
+                  <label><input type="radio" name="paintTool" value="rect">矩形</label>
+                </div>
+                <label class="range-line" for="brushSize">笔刷
+                  <input id="brushSize" type="range" min="4" max="160" value="32">
+                  <span id="brushSizeText">32</span>
+                </label>
+                <div class="btn-row">
+                  <button id="undoButton" class="btn-ghost" type="button">撤销</button>
+                  <button id="clearStrokesButton" class="btn-ghost" type="button">清空画布</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head">
+                <h2 class="card-title">Mask 灵敏度</h2>
+                <span class="card-sub">调后点「生成 mask」</span>
+              </div>
+              <div class="card-body">
+                <div class="sens-row">
+                  <label for="edgeSensitivity">线条边缘 edge</label>
+                  <input id="edgeSensitivity" type="range" min="0.2" max="2" step="0.1" value="1">
+                </div>
+                <div class="sens-row">
+                  <label for="pigmentSensitivity">残色 pigment</label>
+                  <input id="pigmentSensitivity" type="range" min="0.2" max="2" step="0.1" value="1">
+                </div>
+                <div class="sens-row">
+                  <label for="missingSensitivity">缺失 missing</label>
+                  <input id="missingSensitivity" type="range" min="0.2" max="2" step="0.1" value="1">
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-head"><h2 class="card-title">Mask 开关</h2></div>
+              <div id="maskToggles" class="card-body stack-2">
+                <div class="empty-state">生成 mask 后可切换查看各层。</div>
+              </div>
+            </div>
+
+            <div class="metrics">
+              <div class="metric"><div class="k">evidence</div><div class="v" id="evidenceRatio">-</div></div>
+              <div class="metric"><div class="k">damage</div><div class="v" id="damageRatio">-</div></div>
+              <div class="metric"><div class="k">uncertain</div><div class="v" id="uncertainRatio">-</div></div>
+              <div class="metric accent"><div class="k">confidence</div><div class="v" id="maskConfidence">-</div></div>
+            </div>
+
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== 3 评分 -->
+    <section id="scoreStep" class="page" hidden>
+      <div class="page-inner">
+
+        <article class="card">
+          <div class="card-body score-actions">
+            <button id="scoreButton" class="btn-primary" type="button">开始评分</button>
+            <button id="exportZipButton" class="btn-ghost" type="button">导出项目 zip</button>
+            <button id="loadRoundsButton" class="btn-ghost" type="button">刷新校准轮次</button>
+            <div id="reportLink" class="report-box"></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head">
+            <h2 class="card-title">候选对比墙</h2>
+            <span class="card-sub">点击任一候选进入详情</span>
+          </div>
+          <div class="card-body">
+            <div id="compareWall" class="cmp-wall">
+              <div class="empty-state">评分后显示候选缩略图与双榜分数。</div>
+            </div>
+          </div>
+        </article>
+
+        <div class="score-layout">
+          <aside class="card">
+            <div class="card-head"><h2 class="card-title">保守修复榜</h2></div>
+            <div id="conservativeRanking" class="ranking-list">
+              <div class="empty-state">等待评分</div>
+            </div>
+          </aside>
+
+          <article class="card detail-card">
+            <div class="card-head">
+              <h2 class="card-title" id="detailTitle">候选详情</h2>
+              <span id="detailRanks" class="pill neutral">等待评分</span>
+            </div>
+            <div class="detail-body">
+              <div class="detail-image-wrap"><img id="detailImage" alt="候选图"></div>
+              <div>
+                <div id="scoreBars" class="score-bars">
+                  <div class="empty-state">评分后选择候选查看详情。</div>
+                </div>
+                <div id="reasonBox"></div>
+                <div id="compositeScores"></div>
+                <div id="rawMetrics"></div>
+                <div id="riskTags" class="risk-tags"></div>
+                <p id="explanation" class="explanation"></p>
+              </div>
+            </div>
+          </article>
+
+          <aside class="card">
+            <div class="card-head"><h2 class="card-title">展示复原榜</h2></div>
+            <div id="displayRanking" class="ranking-list">
+              <div class="empty-state">等待评分</div>
+            </div>
+          </aside>
+        </div>
+
+        <article class="card">
+          <div class="card-head">
+            <h2 class="card-title">校准轮次</h2>
+            <span class="card-sub">每次评分独立归档，便于盲选校准</span>
+          </div>
+          <div class="card-body">
+            <div id="roundsList" class="rounds-list">
+              <div class="empty-state">暂无轮次</div>
+            </div>
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="card-head"><h2 class="card-title">评分规则说明</h2></div>
+          <div class="card-body">
+            <div class="rules-grid">
+              <div>
+                <h3>保守修复榜</h3>
+                <p>线条忠实度 39% + 结构保持 12% + 残色方向 8% + 损伤区克制 25% + 异常风险 16% - 鲜艳 caution。偏向修旧如旧，允许原线条适度加固，严惩低证据区乱加内容。</p>
+              </div>
+              <div>
+                <h3>展示复原榜</h3>
+                <p>完整度 4% + 展示可读性 16% + 色彩表现 10% + 展陈清晰度 38% + 表面统一 12% + 风格统一 4% + 构图 6% + 证据兼容 6% + 推测风险 4%。偏向展陈清晰度。</p>
+              </div>
+              <div>
+                <h3>颜色逻辑</h3>
+                <p>残色方向在 pigment mask 内比较色相方向，不按 RGB 亮暗差扣分。允许红更红、蓝更蓝；主要扣红变蓝、冷暖跑偏。</p>
+              </div>
+              <div>
+                <h3>当前边界</h3>
+                <p>以原图 mask 作为评价区域，未对候选图做独立语义 mask。仅轻量可解释指标，不用 OpenCV/SSIM/LPIPS。</p>
+              </div>
+            </div>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- ============================================================ 底栏 -->
+  <div class="statusbar" id="statusbar">
+    <span id="status">等待导入</span>
+    <div class="logline" id="log"></div>
+  </div>
+
+</div>
+<script src="/app.js" defer></script>
+</body>
+</html>
