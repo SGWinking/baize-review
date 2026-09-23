@@ -61,7 +61,7 @@ APP_SLUG = "baize-review"
 APP_NAME = "白泽评审"
 APP_NAME_EN = "Baize Review"
 #: 版本号唯一来源（SERIES-SPEC §3）。README / CHANGELOG / 页面页头必须与它一致。
-APP_VERSION = "1.1.0"
+APP_VERSION = "1.2.0"
 
 DEFAULT_PORT = core.PORT_MAP[APP_SLUG]  # 8766
 

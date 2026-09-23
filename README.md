@@ -1,6 +1,6 @@
 # 白泽评审 · Baize Review / 壁画修复候选评分工作台
 
-**Version:** `1.1.0`
+**Version:** `1.2.0`
 
 <img src="assets/logo.svg" alt="白泽评审 Baize Review logo" width="120">
 
