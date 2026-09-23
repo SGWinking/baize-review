@@ -8,8 +8,8 @@
 **保守修复榜**（谁最接近「修旧如旧」）与**展示复原榜**（谁最适合上墙展陈）。
 
 本工具是 **大云壁画工具箱**的一员：相柳网格 · 精卫 · **白泽评审** · 重明 DiffEye · 工具箱启动台。
-（系列仓库并排克隆时，这些名字是相对链接：[相柳网格](../xiangliu-grid) · [精卫](../jingwei) ·
-[重明 DiffEye](../diffeye) · [工具箱启动台](../mural-toolkit-launcher)。）
+（系列仓库并排克隆时，这些名字是相对链接：[相柳网格](../xiangliu-grid) · [精卫](../jingwei-patch) ·
+[重明 DiffEye](../chongming-diffeye) · [工具箱启动台](../dayun-mural-toolkit)。）
 
 ---
 
