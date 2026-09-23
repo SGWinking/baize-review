@@ -378,6 +378,25 @@ input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; 
 .btn-primary:active { background: var(--accent-press); }
 .btn-primary:disabled { background: #b9c2cc; color: #eef1f5; cursor: default; }
 
+/* 进行中的长任务按钮：转圈 + 文字换成「…中」。配合 app.js 的 btn-busy 类使用 */
+.btn-busy { cursor: wait; }
+.btn-busy::before {
+  content: "";
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  margin-right: 8px;
+  vertical-align: -2px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: busy-spin .8s linear infinite;
+}
+@keyframes busy-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .btn-busy::before { animation: none; border-right-color: currentColor; }
+}
+
 .btn-ghost {
   min-height: var(--h-control);
   border: 1px solid var(--line);
@@ -421,6 +440,7 @@ input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; 
   min-width: 0;
 }
 
+.drop:hover { border-color: var(--accent-line); }
 .drop.drag { border-color: var(--accent); background: var(--accent-soft); }
 .drop.has-file { border-style: solid; background: var(--field); }
 

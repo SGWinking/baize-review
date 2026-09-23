@@ -124,6 +124,19 @@ function setBusy(b) {
   document.querySelectorAll("button").forEach((x) => { x.disabled = b; });
 }
 
+/* 长任务的进行中反馈：触发按钮加转圈并把文字换成进行中文案，结束后恢复。 */
+function withBusyButton(btn, label, run) {
+  if (!btn) return run();
+  if (btn.classList.contains("btn-busy")) return run();
+  const original = btn.textContent;
+  btn.classList.add("btn-busy");
+  btn.textContent = label;
+  const restore = () => { btn.classList.remove("btn-busy"); btn.textContent = original; };
+  const p = run();
+  p.then(restore, restore);
+  return p;
+}
+
 function log(msg, data) {
   const t = new Date().toLocaleTimeString();
   $("log").textContent += `[${t}] ${msg}\n` + (data ? JSON.stringify(data) + "\n" : "");
@@ -752,8 +765,9 @@ async function runScore() {
   }
 }
 
-$("scoreButton").addEventListener("click", () =>
-  runScore().catch((e) => { setStatus(e.message, true); setBusy(false); }));
+$("scoreButton").addEventListener("click", (e) =>
+  withBusyButton(e.currentTarget, "评分中…", () =>
+    runScore().catch((e) => { setStatus(e.message, true); setBusy(false); })));
 
 $("loadRoundsButton").addEventListener("click", async () => {
   if (!currentProject) return;
@@ -816,8 +830,9 @@ async function autoReview() {
   }
 }
 
-$("autoReviewButton").addEventListener("click", () =>
-  autoReview().catch((e) => { setStatus(e.message, true); setBusy(false); }));
+$("autoReviewButton").addEventListener("click", (e) =>
+  withBusyButton(e.currentTarget, "自动评审中…", () =>
+    autoReview().catch((e) => { setStatus(e.message, true); setBusy(false); })));
 
 /* ------------------------------------------------------------ 深浅主题 */
 
