@@ -61,7 +61,7 @@ APP_SLUG = "baize-review"
 APP_NAME = "白泽评审"
 APP_NAME_EN = "Baize Review"
 #: 版本号唯一来源（SERIES-SPEC §3）。README / CHANGELOG / 页面页头必须与它一致。
-APP_VERSION = "1.2.0"
+APP_VERSION = "1.2.1"
 
 DEFAULT_PORT = core.PORT_MAP[APP_SLUG]  # 8766
 
@@ -1031,11 +1031,43 @@ def create_project_from_uploads(project_name: str, original: Path, candidates: l
     (project / "candidates").mkdir(parents=True, exist_ok=True)
     original_copy = project / "original" / "original.png"
     original_normalized = normalize_image_to_target(original, original_copy)
+    # 评分的前提是「所有候选与原图像素级同尺寸」。normalize_image_to_target 的缩放规则
+    # 只在长边 >2048 或短边 <1024 时才动手，所以「原图 1600x1200 + 候选 2400x1800」
+    # 会得到 1600x1200 与 2048x1536 两个不同尺寸，score_candidate 直接抛 RuntimeError。
+    # 这里以**原图对齐后的尺寸**为准，把不一致的候选补到同尺寸。
+    ref_w = original_normalized["target_width"]
+    ref_h = original_normalized["target_height"]
+    ref_ratio = ref_w / ref_h
     copied_candidates = []
     for index, candidate in enumerate(candidates, start=1):
         name = safe_name(Path(candidate_infos[index - 1]["name"]).stem)
         out = project / "candidates" / f"{index:02d}_{name}.png"
-        copied_candidates.append(normalize_image_to_target(candidate, out))
+        info = normalize_image_to_target(candidate, out)
+        if (info["width"], info["height"]) != (ref_w, ref_h):
+            # 宽高比差太多就不硬拉 —— 硬拉会把候选图拉变形，评出来的分没有意义。
+            # 容差 3%，与相柳网格的 check_aspect_ratio 保持一致（SERIES-SPEC 系列约定）。
+            cand_ratio = info["width"] / info["height"]
+            if max(ref_ratio, cand_ratio) / min(ref_ratio, cand_ratio) > 1.03:
+                # 这个项目已经建了一半，拒绝候选时顺手收掉，别在 runs/ 里留孤儿目录
+                shutil.rmtree(project, ignore_errors=True)
+                raise core.ValidationError(
+                    f"第 {index} 张候选图与原图的宽高比不一致"
+                    f"（{info['width']}x{info['height']} 对 {ref_w}x{ref_h}），无法做像素级比对。"
+                    f"请先把两张图裁成同一比例。",
+                    field="candidates",
+                    detail=f"candidate[{index}]={info['width']}x{info['height']} ref={ref_w}x{ref_h}",
+                )
+            source_w = info.get("source_width", info["width"])
+            source_h = info.get("source_height", info["height"])
+            with Image.open(out) as resized:
+                resized.convert("RGB").resize((ref_w, ref_h), Image.Resampling.LANCZOS).save(out)
+            info = image_info(out)
+            info["source_width"] = source_w
+            info["source_height"] = source_h
+            info["normalized"] = (source_w, source_h) != (ref_w, ref_h)
+            info["target_width"] = ref_w
+            info["target_height"] = ref_h
+        copied_candidates.append(info)
 
     meta = {
         "projectId": project_id,
